@@ -25,7 +25,6 @@ models/saved/*.json
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
 
 # IDE
 .vscode/
