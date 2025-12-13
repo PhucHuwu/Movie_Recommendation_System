@@ -93,7 +93,7 @@ def show():
             st.plotly_chart(fig, use_container_width=True)
     
     # Metric explanations
-    with st.expander("📖 Metric Explanations"):
+    with st.expander("Metric Explanations"):
         st.markdown("""
         - **RMSE**: Root Mean Square Error - measures rating prediction accuracy
         - **MAE**: Mean Absolute Error - average prediction error
