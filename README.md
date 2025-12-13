@@ -20,7 +20,7 @@ A machine learning-based movie recommendation system with multiple collaborative
 ### 1. Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/PhucHuwu/Movie_Recommendation_System.git
 cd Movie_Recommendation_System
 ```
 
