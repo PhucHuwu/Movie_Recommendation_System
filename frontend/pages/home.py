@@ -7,7 +7,7 @@ from config import BACKEND_URL
 
 def show():
     """Show home page with recommendations"""
-    st.title("🏠 Personalized Recommendations")
+    st.title("Personalized Recommendations")
     
     # Model selector
     col1, col2 = st.columns([3, 1])
@@ -18,10 +18,10 @@ def show():
             "Model",
             ["hybrid", "user_based", "item_based", "neural_cf"],
             format_func=lambda x: {
-                "hybrid": "🔮 Hybrid (Best)",
-                "user_based": "👥 User-Based CF",
-                "item_based": "🎬 Item-Based CF",
-                "neural_cf": "🧠 Neural CF"
+                "hybrid": "Hybrid (Best)",
+                "user_based": "User-Based CF",
+                "item_based": "Item-Based CF",
+                "neural_cf": "Neural CF"
             }[x]
         )
     
@@ -61,7 +61,7 @@ def show():
                             <div style="border: 1px solid #ddd; padding: 15px; border-radius: 10px; height: 200px;">
                                 <h4>#{idx+1} {movie['title']}</h4>
                                 <p><b>Genres:</b> {movie['genres']}</p>
-                                <p style="color: #ff6b6b;"><b>⭐ Predicted Rating:</b> {movie['predicted_rating']:.2f}/5.0</p>
+                                <p style="color: #ff6b6b;"><b>Predicted Rating:</b> {movie['predicted_rating']:.2f}/5.0</p>
                             </div>
                             """, unsafe_allow_html=True)
                             st.markdown("")

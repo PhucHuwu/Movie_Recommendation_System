@@ -7,7 +7,7 @@ from config import BACKEND_URL
 
 def show():
     """Show login page"""
-    st.title("🎬 Movie Recommendation System")
+    st.title("Movie Recommendation System")
     st.markdown("### Login to Get Personalized Recommendations")
     
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -47,5 +47,5 @@ def show():
                     st.info("Make sure the backend server is running at " + BACKEND_URL)
         
         st.markdown("---")
-        st.info("ℹ️ This system uses a curated dataset. You can only login with existing user IDs.")
+        st.info("This system uses a curated dataset. You can only login with existing user IDs.")
         st.caption("Note: New user registration is not available to preserve dataset integrity.")

@@ -38,7 +38,7 @@ def main():
     except:
         print("⚠ Evaluation metrics not found (run evaluation.py first)")
     
-    print("\n✓ Database seeding completed!")
+    print("\nDatabase seeding completed!")
     print("\nYou can now start the backend server:")
     print("  cd backend")
     print("  python server.py")

@@ -8,7 +8,7 @@ from config import BACKEND_URL
 
 def show():
     """Show user profile page"""
-    st.title("👤 My Profile")
+    st.title("My Profile")
     
     # Get user info
     try:
@@ -38,7 +38,7 @@ def show():
                 ratings_data = ratings_response.json()
                 ratings = ratings_data['ratings']
                 
-                st.markdown("### 📚 My Rating History")
+                st.markdown("### My Rating History")
                 
                 if not ratings:
                     st.info("No ratings found.")
@@ -63,7 +63,7 @@ def show():
                 )
                 
                 # Rating distribution
-                st.markdown("### 📊 My Rating Distribution")
+                st.markdown("### My Rating Distribution")
                 rating_counts = df['rating'].value_counts().sort_index()
                 st.bar_chart(rating_counts)
                 

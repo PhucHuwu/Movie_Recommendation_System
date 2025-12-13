@@ -27,7 +27,7 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.title("🎬 Movie Recommender")
+        st.title("Movie Recommender")
         
         if st.session_state.logged_in:
             st.success(f"Logged in as User {st.session_state.user_id}")
@@ -36,7 +36,7 @@ def main():
             st.markdown("---")
             page = st.radio(
                 "Navigation",
-                ["🏠 Home", "🔍 Search", "👤 My Profile", "📊 Admin Dashboard", "📈 Data Visualization", "🤖 Model Evaluation"]
+                ["Home", "Search", "My Profile", "Admin Dashboard", "Data Visualization", "Model Evaluation"]
             )
             
             st.markdown("---")
@@ -53,22 +53,22 @@ def main():
         from frontend.pages import login
         login.show()
     else:
-        if page == "🏠 Home":
+        if page == "Home":
             from frontend.pages import home
             home.show()
-        elif page == "🔍 Search":
+        elif page == "Search":
             from frontend.pages import search
             search.show()
-        elif page == "👤 My Profile":
+        elif page == "My Profile":
             from frontend.pages import profile
             profile.show()
-        elif page == "📊 Admin Dashboard":
+        elif page == "Admin Dashboard":
             from frontend.pages.admin import dashboard
             dashboard.show()
-        elif page == "📈 Data Visualization":
+        elif page == "Data Visualization":
             from frontend.pages.admin import visualization
             visualization.show()
-        elif page == "🤖 Model Evaluation":
+        elif page == "Model Evaluation":
             from frontend.pages.admin import models
             models.show()
 

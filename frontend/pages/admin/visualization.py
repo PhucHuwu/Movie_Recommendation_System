@@ -9,11 +9,11 @@ from config import BACKEND_URL
 
 def show():
     """Show data visualizations"""
-    st.title("📈 Data Visualizations")
+    st.title("Data Visualizations")
     
     try:
         # Rating Distribution
-        st.markdown("### ⭐ Rating Distribution")
+        st.markdown("### Rating Distribution")
         rating_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/rating-distribution")
         
         if rating_response.status_code == 200:
@@ -31,7 +31,7 @@ def show():
         st.markdown("---")
         
         # Genre Distribution
-        st.markdown("### 🎭 Genre Distribution")
+        st.markdown("### Genre Distribution")
         genre_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/genre-distribution")
         
         if genre_response.status_code == 200:
@@ -49,7 +49,7 @@ def show():
         st.markdown("---")
         
         # User Activity
-        st.markdown("### 👥 User Activity Distribution")
+        st.markdown("### User Activity Distribution")
         activity_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/user-activity")
         
         if activity_response.status_code == 200:

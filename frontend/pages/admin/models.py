@@ -9,7 +9,7 @@ from config import BACKEND_URL
 
 def show():
     """Show model evaluation and comparison"""
-    st.title("🤖 Model Evaluation")
+    st.title("Model Evaluation")
     
     try:
         # Get model metrics
@@ -26,7 +26,7 @@ def show():
             metrics = metrics_data['metrics']
             
             # Display metrics table
-            st.markdown("### 📊 Model Performance Metrics")
+            st.markdown("### Model Performance Metrics")
             
             df = pd.DataFrame(metrics)
             
@@ -44,7 +44,7 @@ def show():
             st.markdown("---")
             
             # Model comparison charts
-            st.markdown("### 📈 Model Comparison")
+            st.markdown("### Model Comparison")
             
             comparison_response = requests.get(f"{BACKEND_URL}/api/admin/models/comparison")
             
@@ -133,7 +133,7 @@ def show():
             st.markdown("---")
             
             # Metric explanations
-            with st.expander("📚 Metric Explanations"):
+            with st.expander("Metric Explanations"):
                 st.markdown("""
                 **RMSE (Root Mean Squared Error):** Measures prediction accuracy. Lower is better.
                 

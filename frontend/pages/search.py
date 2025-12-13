@@ -7,7 +7,7 @@ from config import BACKEND_URL
 
 def show():
     """Show search page"""
-    st.title("🔍 Search Movies")
+    st.title("Search Movies")
     
     # Search bar
     search_query = st.text_input("Search by title or genre", placeholder="e.g., Inception, Action, Comedy")
@@ -51,7 +51,7 @@ def show():
             st.error(f"Connection error: {e}")
     else:
         # Show top movies
-        st.markdown("### 🔥 Top Rated Movies")
+        st.markdown("### Top Rated Movies")
         
         try:
             response = requests.get(f"{BACKEND_URL}/api/movies/top/rated", params={"limit": 20})
@@ -61,7 +61,7 @@ def show():
                 movies = data['movies']
                 
                 for i, movie in enumerate(movies, 1):
-                    with st.expander(f"#{i} **{movie['title']}** - ⭐ {movie['avgRating']:.2f} ({movie['numRatings']} ratings)"):
+                    with st.expander(f"#{i} **{movie['title']}** - {movie['avgRating']:.2f} ({movie['numRatings']} ratings)"):
                         st.markdown(f"**Genres:** {movie['genres']}")
                         if movie.get('year'):
                             st.markdown(f"**Year:** {movie['year']}")
@@ -85,7 +85,7 @@ def show_movie_details(movie_id):
             
             # Similar movies
             if movie.get('similar_movies'):
-                st.markdown("### 🎬 Similar Movies")
+                st.markdown("### Similar Movies")
                 for sim_movie in movie['similar_movies']:
                     st.markdown(f"- **{sim_movie['title']}** (Similarity: {sim_movie['similarity_score']:.2f})")
     

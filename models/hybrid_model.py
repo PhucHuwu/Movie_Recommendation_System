@@ -119,7 +119,7 @@ class HybridModel:
         }
         with open(filepath, 'wb') as f:
             pickle.dump(config, f)
-        print(f"✓ Hybrid model config saved to {filepath}")
+        print(f"Hybrid model config saved to {filepath}")
     
     @classmethod
     def load(cls, filepath, user_based_model, item_based_model, neural_cf_model):
@@ -134,5 +134,5 @@ class HybridModel:
             weights=config['weights']
         )
         
-        print(f"✓ Hybrid model loaded from {filepath}")
+        print(f"Hybrid model loaded from {filepath}")
         return model

@@ -1,6 +1,6 @@
 # Movie Recommendation System - Quick Start Guide
 
-## 🚀 Hướng dẫn triển khai nhanh
+## Hướng dẫn triển khai nhanh
 
 ### Bước 1: Cài đặt dependencies
 
@@ -68,14 +68,14 @@ streamlit run app.py
 
 Frontend sẽ mở tại: `http://localhost:8501`
 
-## 📝 Lưu ý
+## Lưu ý
 
 -   Dataset phải ≥ 2000 movies (đã đáp ứng)
 -   Không có chức năng đăng ký user mới (bảo toàn dataset)
 -   Admin interface có thể truy cập bởi tất cả users
 -   System sử dụng 4 models: User-Based CF, Item-Based CF, Neural CF, Hybrid
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Lỗi kết nối MongoDB
 

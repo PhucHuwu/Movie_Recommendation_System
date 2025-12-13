@@ -30,7 +30,7 @@ class Database:
         movies_records = movies_df.to_dict('records')
         if movies_records:
             self.movies.insert_many(movies_records)
-            print(f"✓ Inserted {len(movies_records)} movies")
+            print(f"Inserted {len(movies_records)} movies")
         
         # Insert ratings
         ratings_records = ratings_df.to_dict('records')
@@ -40,14 +40,14 @@ class Database:
             for i in range(0, len(ratings_records), batch_size):
                 batch = ratings_records[i:i+batch_size]
                 self.ratings.insert_many(batch)
-            print(f"✓ Inserted {len(ratings_records)} ratings")
+            print(f"Inserted {len(ratings_records)} ratings")
         
         # Create unique users collection
         unique_users = ratings_df['userId'].unique()
         users_records = [{'userId': int(uid)} for uid in unique_users]
         if users_records:
             self.users.insert_many(users_records)
-            print(f"✓ Inserted {len(users_records)} users")
+            print(f"Inserted {len(users_records)} users")
         
         # Create indexes for better performance
         self.movies.create_index([('movieId', 1)])
@@ -55,13 +55,13 @@ class Database:
         self.ratings.create_index([('movieId', 1)])
         self.users.create_index([('userId', 1)])
         
-        print("✓ Database seeded successfully")
+        print("Database seeded successfully")
     
     def save_metrics(self, metrics):
         """Save evaluation metrics"""
         self.metrics.delete_many({})  # Clear old metrics
         self.metrics.insert_many(metrics)
-        print("✓ Metrics saved to database")
+        print("Metrics saved to database")
     
     def get_movie(self, movie_id):
         """Get movie by ID"""

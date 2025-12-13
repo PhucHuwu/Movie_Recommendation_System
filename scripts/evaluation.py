@@ -144,7 +144,7 @@ def save_metrics(all_metrics):
     with open(output_file, 'w') as f:
         json.dump(all_metrics, f, indent=2)
     
-    print(f"\n✓ Metrics saved to {output_file}")
+    print(f"\nMetrics saved to {output_file}")
 
 def print_comparison(all_metrics):
     """Print comparison table"""
@@ -163,7 +163,7 @@ def print_comparison(all_metrics):
               f"{metrics['recall@10']:<15.4f}")
     
     # Find best models
-    print("\n📊 Best Models:")
+    print("\nBest Models:")
     best_rmse = min(all_metrics, key=lambda x: x['rmse'])
     best_mae = min(all_metrics, key=lambda x: x['mae'])
     best_precision = max(all_metrics, key=lambda x: x['precision@10'])
@@ -197,7 +197,7 @@ def main():
     # Print comparison
     print_comparison(all_metrics)
     
-    print("\n✓ Evaluation completed successfully!")
+    print("\nEvaluation completed successfully!")
 
 if __name__ == "__main__":
     main()

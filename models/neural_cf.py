@@ -136,7 +136,7 @@ class NeuralCF:
             verbose=1
         )
         
-        print("✓ Neural CF training completed")
+        print("Neural CF training completed")
         return history
     
     def predict(self, user_id, movie_id):
@@ -244,7 +244,7 @@ class NeuralCF:
         with open(filepath, 'wb') as f:
             pickle.dump(metadata, f)
         
-        print(f"✓ Model saved to {filepath} and {model_path}")
+        print(f"Model saved to {filepath} and {model_path}")
     
     @classmethod
     def load(cls, filepath):
@@ -273,5 +273,5 @@ class NeuralCF:
         model.n_users = metadata['n_users']
         model.n_movies = metadata['n_movies']
         
-        print(f"✓ Model loaded from {filepath}")
+        print(f"Model loaded from {filepath}")
         return model

@@ -25,16 +25,18 @@ def create_genre_features(movies):
     """Create TF-IDF features from genres"""
     print("\nCreating genre features with TF-IDF...")
     
+    # Replace pipe with space for tokenization
+    genres_for_tfidf = movies['genres'].str.replace('|', ' ', regex=False)
+    
     # TF-IDF vectorization of genres
     tfidf = TfidfVectorizer(
-        tokenizer=lambda x: x.split('|'),
         lowercase=False,
-        token_pattern=None
+        token_pattern=r'[A-Za-z-]+',  # Match genre names
     )
     
-    genre_features = tfidf.fit_transform(movies['genres'])
+    genre_features = tfidf.fit_transform(genres_for_tfidf)
     
-    print(f"✓ Genre features shape: {genre_features.shape}")
+    print(f"Genre features shape: {genre_features.shape}")
     print(f"  Vocabulary size: {len(tfidf.vocabulary_)}")
     
     return genre_features, tfidf
@@ -68,7 +70,7 @@ def create_user_item_matrix(ratings, movies):
         shape=(n_users, n_movies)
     )
     
-    print(f"✓ Interaction matrix shape: {interaction_matrix.shape}")
+    print(f"Interaction matrix shape: {interaction_matrix.shape}")
     print(f"  Users: {n_users:,}")
     print(f"  Movies: {n_movies:,}")
     print(f"  Density: {interaction_matrix.nnz / (n_users * n_movies):.4%}")
@@ -110,7 +112,7 @@ def stratified_user_split(ratings, test_size=0.2, random_state=42):
     train_df = pd.concat(train_list, ignore_index=True)
     test_df = pd.concat(test_list, ignore_index=True)
     
-    print(f"✓ Split completed:")
+    print(f"Split completed:")
     print(f"  Train: {len(train_df):,} ratings from {train_df['userId'].nunique():,} users")
     print(f"  Test: {len(test_df):,} ratings from {test_df['userId'].nunique():,} users")
     print(f"  Users with split: {users_with_split:,}")
@@ -128,7 +130,7 @@ def normalize_ratings(ratings, train_ratings):
     ratings_copy = ratings.copy()
     ratings_copy['rating_normalized'] = (ratings['rating'] - mean_rating) / std_rating
     
-    print(f"✓ Normalization params: mean={mean_rating:.2f}, std={std_rating:.2f}")
+    print(f"Normalization params: mean={mean_rating:.2f}, std={std_rating:.2f}")
     
     return ratings_copy, mean_rating, std_rating
 
@@ -169,7 +171,7 @@ def save_features(genre_features, tfidf, interaction_matrix,
     # Save movie metadata (for recommendations)
     movies.to_csv(FEATURES_DIR / "movies_metadata.csv", index=False)
     
-    print(f"✓ Features saved to {FEATURES_DIR}")
+    print(f"Features saved to {FEATURES_DIR}")
 
 def main():
     """Main feature engineering pipeline"""
@@ -205,7 +207,7 @@ def main():
         mean_rating, std_rating
     )
     
-    print("\n✓ Feature engineering completed successfully!")
+    print("\nFeature engineering completed successfully!")
 
 if __name__ == "__main__":
     main()

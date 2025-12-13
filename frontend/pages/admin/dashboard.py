@@ -7,7 +7,7 @@ from config import BACKEND_URL
 
 def show():
     """Show admin dashboard"""
-    st.title("📊 Admin Dashboard")
+    st.title("Admin Dashboard")
     st.caption("Dataset Statistics (Accessible to all users)")
     
     try:
@@ -31,7 +31,7 @@ def show():
             st.markdown("---")
             
             # Top genres
-            st.markdown("### 🎭 Top Genres")
+            st.markdown("### Top Genres")
             
             if stats.get('top_genres'):
                 # Create two columns for genre display
@@ -51,7 +51,7 @@ def show():
             st.markdown("---")
             
             # Dataset info
-            st.markdown("### ℹ️ Dataset Information")
+            st.markdown("### Dataset Information")
             st.info("""
             This recommendation system uses a curated dataset from Kaggle.
             The dataset contains movie information and user ratings, enabling 

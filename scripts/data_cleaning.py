@@ -43,7 +43,7 @@ def clean_movies(movies):
     movies['year'] = movies['title'].str.extract(r'\((\d{4})\)$')
     movies['year'] = pd.to_numeric(movies['year'], errors='coerce')
     
-    print(f"✓ Cleaned movies: {len(movies)} records")
+    print(f"Cleaned movies: {len(movies)} records")
     return movies
 
 def clean_ratings(ratings, valid_movie_ids):
@@ -99,7 +99,7 @@ def clean_ratings(ratings, valid_movie_ids):
         converged = (len(ratings) == prev_len)
         print(f"  Iteration {iteration}: {len(ratings)} ratings, {ratings['userId'].nunique()} users, {ratings['movieId'].nunique()} movies")
     
-    print(f"✓ Cleaned ratings: {len(ratings)} records")
+    print(f"Cleaned ratings: {len(ratings)} records")
     return ratings
 
 def save_cleaned_data(movies, ratings):
@@ -111,7 +111,7 @@ def save_cleaned_data(movies, ratings):
     movies.to_csv(PROCESSED_DATA_DIR / "movies_cleaned.csv", index=False)
     ratings.to_csv(PROCESSED_DATA_DIR / "ratings_cleaned.csv", index=False)
     
-    print(f"✓ Saved to {PROCESSED_DATA_DIR}")
+    print(f"Saved to {PROCESSED_DATA_DIR}")
 
 def print_statistics(movies, ratings):
     """Print dataset statistics"""
@@ -119,12 +119,12 @@ def print_statistics(movies, ratings):
     print("CLEANED DATA STATISTICS")
     print("=" * 60)
     
-    print(f"\n📊 Movies:")
+    print(f"\nMovies:")
     print(f"   Total: {len(movies):,}")
     print(f"   Unique genres: {movies['genres'].nunique():,}")
     print(f"   Year range: {movies['year'].min():.0f} - {movies['year'].max():.0f}" if not movies['year'].isna().all() else "   Year range: N/A")
     
-    print(f"\n📊 Ratings:")
+    print(f"\nRatings:")
     print(f"   Total: {len(ratings):,}")
     print(f"   Users: {ratings['userId'].nunique():,}")
     print(f"   Movies rated: {ratings['movieId'].nunique():,}")
@@ -132,7 +132,7 @@ def print_statistics(movies, ratings):
     print(f"   Mean rating: {ratings['rating'].mean():.2f}")
     print(f"   Median rating: {ratings['rating'].median():.1f}")
     
-    print(f"\n📊 Sparsity:")
+    print(f"\nSparsity:")
     n_users = ratings['userId'].nunique()
     n_movies = ratings['movieId'].nunique()
     n_ratings = len(ratings)
@@ -140,7 +140,7 @@ def print_statistics(movies, ratings):
     print(f"   Matrix size: {n_users:,} users × {n_movies:,} movies")
     print(f"   Sparsity: {sparsity:.2%}")
     
-    print(f"\n📊 Top 5 genres:")
+    print(f"\nTop 5 genres:")
     genre_counts = movies['genres'].value_counts().head(5)
     for genre, count in genre_counts.items():
         print(f"   {genre}: {count}")
@@ -164,7 +164,7 @@ def main():
     # Save cleaned data
     save_cleaned_data(movies, ratings)
     
-    print("\n✓ Data cleaning completed successfully!")
+    print("\nData cleaning completed successfully!")
 
 if __name__ == "__main__":
     main()

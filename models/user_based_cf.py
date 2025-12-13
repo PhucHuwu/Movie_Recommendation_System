@@ -49,7 +49,7 @@ class UserBasedCF:
         print("Computing user-user similarity matrix...")
         self.user_similarity = cosine_similarity(interaction_matrix, dense_output=False)
         
-        print(f"✓ User similarity matrix shape: {self.user_similarity.shape}")
+        print(f"User similarity matrix shape: {self.user_similarity.shape}")
         
     def predict(self, user_id, movie_id):
         """
@@ -164,7 +164,7 @@ class UserBasedCF:
         }
         with open(filepath, 'wb') as f:
             pickle.dump(model_data, f)
-        print(f"✓ Model saved to {filepath}")
+        print(f"Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
@@ -181,5 +181,5 @@ class UserBasedCF:
         model.idx_to_movie = model_data['idx_to_movie']
         model.mean_rating = model_data['mean_rating']
         
-        print(f"✓ Model loaded from {filepath}")
+        print(f"Model loaded from {filepath}")
         return model

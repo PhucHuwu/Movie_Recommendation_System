@@ -30,7 +30,7 @@ def load_features():
     train_ratings = pd.read_csv(FEATURES_DIR / "train_ratings.csv")
     test_ratings = pd.read_csv(FEATURES_DIR / "test_ratings.csv")
     
-    print("✓ Features loaded")
+    print("Features loaded")
     return interaction_matrix, mappings, train_ratings, test_ratings
 
 def train_user_based_cf(interaction_matrix, mappings):
@@ -141,7 +141,7 @@ def main():
     hybrid = train_hybrid_model(user_based, item_based, neural_cf)
     
     print("\n" + "=" * 60)
-    print("✓ ALL MODELS TRAINED SUCCESSFULLY")
+    print("ALL MODELS TRAINED SUCCESSFULLY")
     print("=" * 60)
     print(f"\nModels saved to: {SAVED_MODELS_DIR}")
     print("\nNext steps:")

@@ -2,20 +2,20 @@
 
 Hệ thống gợi ý phim sử dụng Machine Learning với 4 mô hình: User-Based CF, Item-Based CF, Neural CF, và Hybrid Model.
 
-## 📋 Tính năng chính
+## Tính năng chính
 
 ### User Interface
 
--   🔐 **Login**: Đăng nhập với userId từ dataset
--   🔍 **Search**: Tìm kiếm phim theo tên, thể loại
--   🎬 **Recommendations**: Gợi ý phim cá nhân hóa từ 4 mô hình AI
--   👤 **Profile**: Thông tin user và lịch sử đánh giá
+-   **Login**: Đăng nhập với userId từ dataset
+-   **Search**: Tìm kiếm phim theo tên, thể loại
+-   **Recommendations**: Gợi ý phim cá nhân hóa từ 4 mô hình AI
+-   **Profile**: Thông tin user và lịch sử đánh giá
 
 ### Admin Interface (Accessible by all users)
 
--   📊 **Statistics**: Thống kê dataset
--   📈 **Visualizations**: Trực quan hóa dữ liệu
--   🤖 **Model Evaluation**: So sánh hiệu suất các mô hình
+-   **Statistics**: Thống kê dataset
+-   **Visualizations**: Trực quan hóa dữ liệu
+-   **Model Evaluation**: So sánh hiệu suất các mô hình
 
 ## 🛠 Technology Stack
 
@@ -24,7 +24,7 @@ Hệ thống gợi ý phim sử dụng Machine Learning với 4 mô hình: User-
 -   **ML Models**: scikit-learn, TensorFlow
 -   **Data Processing**: pandas, numpy, scipy
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 Movie_Recommendation_System/
@@ -57,7 +57,7 @@ Movie_Recommendation_System/
 └── tests/
 ```
 
-## 🚀 Installation
+## Installation
 
 ### 1. Clone repository
 
@@ -93,7 +93,7 @@ python scripts/feature_engineering.py
 python scripts/train_models.py
 ```
 
-## ▶️ Running the Application
+## Running the Application
 
 ### Start Backend
 
@@ -111,7 +111,7 @@ streamlit run app.py
 
 Mở browser tại: `http://localhost:8501`
 
-## 📊 Dataset
+## Dataset
 
 -   **Source**: [Kaggle - Movie Recommendation System](https://www.kaggle.com/datasets/parasharmanas/movie-recommendation-system)
 -   **Files**:
@@ -119,24 +119,24 @@ Mở browser tại: `http://localhost:8501`
     -   `ratings.csv`: userId, movieId, rating, timestamp
 -   **Size**: ≥2000 movies
 
-## 🤖 Models
+## Models
 
 1. **User-Based Collaborative Filtering**: Tìm users tương tự dựa trên rating patterns
 2. **Item-Based Collaborative Filtering**: Tìm movies tương tự dựa trên user interactions
 3. **Neural Collaborative Filtering**: Deep learning approach với embeddings
 4. **Hybrid Model**: Kết hợp predictions từ 3 models trên
 
-## 📈 Evaluation Metrics
+## Evaluation Metrics
 
 -   RMSE (Root Mean Squared Error)
 -   MAE (Mean Absolute Error)
 -   Precision@K
 -   Recall@K
 
-## 🔒 Note
+## Note
 
 Hệ thống không cho phép users tạo rating mới để bảo toàn dataset gốc.
 
-## 📄 License
+## License
 
 MIT License

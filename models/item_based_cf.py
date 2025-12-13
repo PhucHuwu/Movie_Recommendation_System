@@ -53,7 +53,7 @@ class ItemBasedCF:
             dense_output=False
         )
         
-        print(f"✓ Item similarity matrix shape: {self.item_similarity.shape}")
+        print(f"Item similarity matrix shape: {self.item_similarity.shape}")
         
     def predict(self, user_id, movie_id):
         """
@@ -195,7 +195,7 @@ class ItemBasedCF:
         }
         with open(filepath, 'wb') as f:
             pickle.dump(model_data, f)
-        print(f"✓ Model saved to {filepath}")
+        print(f"Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
@@ -212,5 +212,5 @@ class ItemBasedCF:
         model.idx_to_movie = model_data['idx_to_movie']
         model.mean_rating = model_data['mean_rating']
         
-        print(f"✓ Model loaded from {filepath}")
+        print(f"Model loaded from {filepath}")
         return model

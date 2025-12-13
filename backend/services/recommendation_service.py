@@ -44,7 +44,7 @@ class RecommendationService:
                 self.models['neural_cf']
             )
             
-            print("✓ All models loaded successfully")
+            print("All models loaded successfully")
         except Exception as e:
             print(f"Error loading models: {e}")
             print("Make sure you have trained the models first!")
@@ -53,7 +53,7 @@ class RecommendationService:
         """Load movie metadata"""
         try:
             self.movies_metadata = pd.read_csv(FEATURES_DIR / "movies_metadata.csv")
-            print(f"✓ Loaded metadata for {len(self.movies_metadata)} movies")
+            print(f"Loaded metadata for {len(self.movies_metadata)} movies")
         except Exception as e:
             print(f"Error loading metadata: {e}")
     
