@@ -71,6 +71,15 @@ Training takes 5-15 minutes depending on hardware.
 python scripts/evaluation.py
 ```
 
+### 9. Seed MongoDB
+
+If using MongoDB for search and statistics:
+
+```bash
+# Start MongoDB first, then:
+python scripts/seed_database.py
+```
+
 ## Running the Application
 
 ### Start Backend Server
@@ -92,15 +101,6 @@ streamlit run app.py
 ```
 
 Frontend runs at: http://localhost:8501
-
-## Optional: Seed MongoDB
-
-If using MongoDB for search and statistics:
-
-```bash
-# Start MongoDB first, then:
-python scripts/seed_database.py
-```
 
 ## Project Structure
 
