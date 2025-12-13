@@ -1,142 +1,139 @@
 # Movie Recommendation System
 
-Hệ thống gợi ý phim sử dụng Machine Learning với 4 mô hình: User-Based CF, Item-Based CF, Neural CF, và Hybrid Model.
+A machine learning-based movie recommendation system with multiple collaborative filtering models.
 
-## Tính năng chính
+## Features
 
-### User Interface
+-   4 Recommendation Models: User-Based CF, Item-Based CF, Neural CF, Hybrid
+-   Web Interface: Streamlit frontend with user and admin dashboards
+-   REST API: FastAPI backend with MongoDB storage
+-   Data Visualization: Rating distributions, genre analysis, model comparison
 
--   **Login**: Đăng nhập với userId từ dataset
--   **Search**: Tìm kiếm phim theo tên, thể loại
--   **Recommendations**: Gợi ý phim cá nhân hóa từ 4 mô hình AI
--   **Profile**: Thông tin user và lịch sử đánh giá
+## Requirements
 
-### Admin Interface (Accessible by all users)
-
--   **Statistics**: Thống kê dataset
--   **Visualizations**: Trực quan hóa dữ liệu
--   **Model Evaluation**: So sánh hiệu suất các mô hình
-
-## 🛠 Technology Stack
-
--   **Backend**: FastAPI + MongoDB
--   **Frontend**: Streamlit
--   **ML Models**: scikit-learn, TensorFlow
--   **Data Processing**: pandas, numpy, scipy
-
-## Project Structure
-
-```
-Movie_Recommendation_System/
-├── data/
-│   ├── raw/              # Dataset gốc từ Kaggle
-│   ├── processed/        # Dữ liệu đã làm sạch
-│   └── features/         # Features đã vector hóa
-├── models/
-│   ├── saved/           # Model weights
-│   ├── user_based_cf.py
-│   ├── item_based_cf.py
-│   ├── neural_cf.py
-│   └── hybrid_model.py
-├── scripts/
-│   ├── download_dataset.py
-│   ├── data_cleaning.py
-│   ├── feature_engineering.py
-│   ├── train_models.py
-│   └── evaluation.py
-├── backend/
-│   ├── server.py
-│   ├── database.py
-│   ├── routes/
-│   └── services/
-├── frontend/
-│   ├── app.py
-│   └── pages/
-├── notebooks/
-│   └── eda_notebook.ipynb
-└── tests/
-```
+-   Python 3.10.16
+-   MongoDB (for database features)
+-   4GB+ RAM recommended (large dataset with 25M ratings)
 
 ## Installation
 
-### 1. Clone repository
+### 1. Clone Repository
 
 ```bash
-git clone <repo-url>
+git clone <repository-url>
 cd Movie_Recommendation_System
 ```
 
-### 2. Install dependencies
+### 2. Create Conda Environment
+
+```bash
+conda create -n RCMsys python=3.10.16
+conda activate RCMsys
+```
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Setup environment
-
-```bash
-cp .env.example .env
-# Edit .env với MongoDB connection string và Kaggle API key
-```
-
-### 4. Download dataset
+### 4. Download Dataset
 
 ```bash
 python scripts/download_dataset.py
 ```
 
-### 5. Prepare data và train models
+This downloads the MovieLens dataset from Kaggle (approx. 25M ratings, 60K movies).
+
+### 5. Clean Data
 
 ```bash
-python scripts/data_cleaning.py
+python scripts/clean_data.py
+```
+
+### 6. Run Feature Engineering
+
+```bash
 python scripts/feature_engineering.py
+```
+
+### 7. Train Models
+
+```bash
 python scripts/train_models.py
+```
+
+Training takes 5-15 minutes depending on hardware.
+
+### 8. Evaluate Models
+
+```bash
+python scripts/evaluation.py
 ```
 
 ## Running the Application
 
-### Start Backend
+### Start Backend Server
 
 ```bash
 cd backend
-uvicorn server:app --reload --port 8000
+python server.py
 ```
 
-### Start Frontend
+Backend runs at: http://localhost:8000
+
+API Documentation: http://localhost:8000/docs
+
+### Start Frontend (New Terminal)
 
 ```bash
 cd frontend
 streamlit run app.py
 ```
 
-Mở browser tại: `http://localhost:8501`
+Frontend runs at: http://localhost:8501
 
-## Dataset
+## Optional: Seed MongoDB
 
--   **Source**: [Kaggle - Movie Recommendation System](https://www.kaggle.com/datasets/parasharmanas/movie-recommendation-system)
--   **Files**:
-    -   `movies.csv`: movieId, title, genres
-    -   `ratings.csv`: userId, movieId, rating, timestamp
--   **Size**: ≥2000 movies
+If using MongoDB for search and statistics:
+
+```bash
+# Start MongoDB first, then:
+python scripts/seed_database.py
+```
+
+## Project Structure
+
+```
+Movie_Recommendation_System/
+├── backend/           # FastAPI server
+├── frontend/          # Streamlit web app
+├── models/            # ML model implementations
+├── scripts/           # Data processing and training
+├── data/              # Raw and processed data
+└── config.py          # Configuration settings
+```
 
 ## Models
 
-1. **User-Based Collaborative Filtering**: Tìm users tương tự dựa trên rating patterns
-2. **Item-Based Collaborative Filtering**: Tìm movies tương tự dựa trên user interactions
-3. **Neural Collaborative Filtering**: Deep learning approach với embeddings
-4. **Hybrid Model**: Kết hợp predictions từ 3 models trên
+| Model         | Description                        |
+| ------------- | ---------------------------------- |
+| User-Based CF | Recommends based on similar users  |
+| Item-Based CF | Recommends based on similar items  |
+| Neural CF     | MLP-based collaborative filtering  |
+| Hybrid        | Weighted combination of all models |
 
 ## Evaluation Metrics
 
--   RMSE (Root Mean Squared Error)
--   MAE (Mean Absolute Error)
--   Precision@K
--   Recall@K
+-   RMSE: Root Mean Square Error
+-   MAE: Mean Absolute Error
+-   Precision@K: Recommendation relevance
+-   Recall@K: Coverage of relevant items
 
-## Note
+## Troubleshooting
 
-Hệ thống không cho phép users tạo rating mới để bảo toàn dataset gốc.
+**Import errors**: Ensure you are in the project root directory when running scripts.
 
-## License
+**Memory errors**: The dataset is large. Try reducing sample sizes in config.py.
 
-MIT License
+**MongoDB connection**: Make sure MongoDB is running before using database features.
