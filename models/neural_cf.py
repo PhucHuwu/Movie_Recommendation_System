@@ -1,26 +1,23 @@
 """
-Neural Collaborative Filtering Model
+Neural Collaborative Filtering Model using sklearn MLPRegressor
 """
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+from sklearn.neural_network import MLPRegressor
 import pickle
 
 class NeuralCF:
-    def __init__(self, embedding_dim=32, hidden_layers=[64, 32, 16, 8], 
-                 learning_rate=0.001):
+    def __init__(self, hidden_layers=(64, 32, 16), learning_rate=0.001, max_iter=20):
         """
-        Neural Collaborative Filtering
+        Neural Collaborative Filtering using sklearn MLP
         
         Args:
-            embedding_dim: Dimension of user and item embeddings
-            hidden_layers: List of hidden layer sizes
+            hidden_layers: Tuple of hidden layer sizes
             learning_rate: Learning rate for optimizer
+            max_iter: Maximum training iterations
         """
-        self.embedding_dim = embedding_dim
         self.hidden_layers = hidden_layers
         self.learning_rate = learning_rate
+        self.max_iter = max_iter
         self.model = None
         self.user_id_map = None
         self.movie_id_map = None
@@ -30,82 +27,13 @@ class NeuralCF:
         self.n_users = None
         self.n_movies = None
         
-    def build_model(self, n_users, n_movies):
-        """
-        Build the neural network architecture
-        
-        Args:
-            n_users: Number of users
-            n_movies: Number of movies
-        """
-        # User embedding path
-        user_input = layers.Input(shape=(1,), name='user_input')
-        user_embedding = layers.Embedding(
-            n_users, 
-            self.embedding_dim,
-            name='user_embedding'
-        )(user_input)
-        user_vec = layers.Flatten(name='user_flatten')(user_embedding)
-        
-        # Movie embedding path
-        movie_input = layers.Input(shape=(1,), name='movie_input')
-        movie_embedding = layers.Embedding(
-            n_movies,
-            self.embedding_dim,
-            name='movie_embedding'
-        )(movie_input)
-        movie_vec = layers.Flatten(name='movie_flatten')(movie_embedding)
-        
-        # Concatenate embeddings
-        concat = layers.Concatenate(name='concat')([user_vec, movie_vec])
-        
-        # MLP layers
-        x = concat
-        for i, hidden_size in enumerate(self.hidden_layers):
-            x = layers.Dense(
-                hidden_size,
-                activation='relu',
-                name=f'hidden_{i}'
-            )(x)
-            x = layers.Dropout(0.2, name=f'dropout_{i}')(x)
-        
-        # Output layer
-        output = layers.Dense(1, name='output')(x)
-        
-        # Build model
-        model = keras.Model(
-            inputs=[user_input, movie_input],
-            outputs=output,
-            name='NeuralCF'
-        )
-        
-        # Compile model
-        model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate),
-            loss='mse',
-            metrics=['mae']
-        )
-        
-        return model
-    
     def fit(self, train_ratings, user_id_map, movie_id_map, 
             idx_to_user, idx_to_movie, mean_rating,
-            epochs=20, batch_size=256, validation_split=0.1):
+            epochs=20, batch_size=None, validation_split=None):
         """
-        Train the neural network
-        
-        Args:
-            train_ratings: DataFrame with userId, movieId, rating columns
-            user_id_map: Dict mapping userId to matrix index
-            movie_id_map: Dict mapping movieId to matrix index
-            idx_to_user: Dict mapping matrix index to userId
-            idx_to_movie: Dict mapping matrix index to movieId
-            mean_rating: Mean rating for normalization
-            epochs: Number of training epochs
-            batch_size: Batch size
-            validation_split: Validation split ratio
+        Train the MLP model
         """
-        print("Training Neural CF...")
+        print("Training Neural CF (sklearn MLP)...")
         
         self.user_id_map = user_id_map
         self.movie_id_map = movie_id_map
@@ -115,40 +43,51 @@ class NeuralCF:
         self.n_users = len(user_id_map)
         self.n_movies = len(movie_id_map)
         
-        # Build model
-        self.model = self.build_model(self.n_users, self.n_movies)
+        # Prepare data - sample if dataset is too large
+        sample_size = min(500000, len(train_ratings))
+        if len(train_ratings) > sample_size:
+            print(f"  Sampling {sample_size:,} ratings for training...")
+            train_sample = train_ratings.sample(n=sample_size, random_state=42)
+        else:
+            train_sample = train_ratings
         
-        # Prepare training data
-        train_ratings['user_idx'] = train_ratings['userId'].map(user_id_map)
-        train_ratings['movie_idx'] = train_ratings['movieId'].map(movie_id_map)
+        # Map user/movie IDs to indices
+        train_sample = train_sample.copy()
+        train_sample['user_idx'] = train_sample['userId'].map(user_id_map)
+        train_sample['movie_idx'] = train_sample['movieId'].map(movie_id_map)
         
-        user_indices = train_ratings['user_idx'].values
-        movie_indices = train_ratings['movie_idx'].values
-        ratings = train_ratings['rating'].values
+        # Remove any rows with unmapped values
+        train_sample = train_sample.dropna(subset=['user_idx', 'movie_idx'])
         
-        # Train model
-        history = self.model.fit(
-            [user_indices, movie_indices],
-            ratings,
-            epochs=epochs,
-            batch_size=batch_size,
-            validation_split=validation_split,
-            verbose=1
+        # Create features: user index and movie index
+        X = train_sample[['user_idx', 'movie_idx']].values.astype(np.float32)
+        # Normalize indices
+        X[:, 0] = X[:, 0] / self.n_users
+        X[:, 1] = X[:, 1] / self.n_movies
+        
+        y = train_sample['rating'].values
+        
+        print(f"  Training on {len(X):,} samples...")
+        
+        # Build and train model
+        self.model = MLPRegressor(
+            hidden_layer_sizes=self.hidden_layers,
+            learning_rate_init=self.learning_rate,
+            max_iter=self.max_iter,
+            early_stopping=True,
+            validation_fraction=0.1,
+            random_state=42,
+            verbose=True
         )
         
+        self.model.fit(X, y)
+        
         print("Neural CF training completed")
-        return history
+        return None
     
     def predict(self, user_id, movie_id):
         """
         Predict rating for a user-movie pair
-        
-        Args:
-            user_id: User ID
-            movie_id: Movie ID
-            
-        Returns:
-            Predicted rating
         """
         if user_id not in self.user_id_map or movie_id not in self.movie_id_map:
             return self.mean_rating
@@ -156,11 +95,10 @@ class NeuralCF:
         user_idx = self.user_id_map[user_id]
         movie_idx = self.movie_id_map[movie_id]
         
-        # Predict
-        prediction = self.model.predict(
-            [np.array([user_idx]), np.array([movie_idx])],
-            verbose=0
-        )[0][0]
+        # Normalize
+        X = np.array([[user_idx / self.n_users, movie_idx / self.n_movies]])
+        
+        prediction = self.model.predict(X)[0]
         
         # Clip to valid rating range
         return np.clip(prediction, 0.5, 5.0)
@@ -168,18 +106,8 @@ class NeuralCF:
     def recommend(self, user_id, k=10, exclude_rated=True, rated_movies=None):
         """
         Generate top-k recommendations for a user
-        
-        Args:
-            user_id: User ID
-            k: Number of recommendations
-            exclude_rated: Whether to exclude already rated movies
-            rated_movies: Set of already rated movie IDs (for efficiency)
-            
-        Returns:
-            List of (movie_id, predicted_rating) tuples
         """
         if user_id not in self.user_id_map:
-            # New user - return popular movies
             return self._recommend_popular(k)
         
         user_idx = self.user_id_map[user_id]
@@ -193,30 +121,29 @@ class NeuralCF:
         else:
             candidate_movies = all_movies
         
-        # Batch predict for efficiency
-        user_indices = np.array([user_idx] * len(candidate_movies))
+        # Limit candidates for efficiency
+        if len(candidate_movies) > 5000:
+            import random
+            candidate_movies = random.sample(candidate_movies, 5000)
+        
+        # Batch predict
         movie_indices = np.array([self.movie_id_map[m] for m in candidate_movies])
+        X = np.column_stack([
+            np.full(len(movie_indices), user_idx / self.n_users),
+            movie_indices / self.n_movies
+        ])
         
-        predictions = self.model.predict(
-            [user_indices, movie_indices],
-            batch_size=512,
-            verbose=0
-        ).flatten()
-        
-        # Clip predictions
+        predictions = self.model.predict(X)
         predictions = np.clip(predictions, 0.5, 5.0)
         
         # Create movie-rating pairs
         movie_ratings = list(zip(candidate_movies, predictions))
-        
-        # Sort by predicted rating
         movie_ratings.sort(key=lambda x: x[1], reverse=True)
         
         return movie_ratings[:k]
     
     def _recommend_popular(self, k=10):
         """Recommend popular movies for cold-start users"""
-        # Return random movies with mean rating (placeholder)
         import random
         movies = list(self.movie_id_map.keys())
         selected = random.sample(movies, min(k, len(movies)))
@@ -224,15 +151,11 @@ class NeuralCF:
     
     def save(self, filepath):
         """Save model to disk"""
-        # Save Keras model
-        model_path = filepath.replace('.pkl', '_keras.h5')
-        self.model.save(model_path)
-        
-        # Save metadata
-        metadata = {
-            'embedding_dim': self.embedding_dim,
+        model_data = {
             'hidden_layers': self.hidden_layers,
             'learning_rate': self.learning_rate,
+            'max_iter': self.max_iter,
+            'model': self.model,
             'user_id_map': self.user_id_map,
             'movie_id_map': self.movie_id_map,
             'idx_to_user': self.idx_to_user,
@@ -242,36 +165,30 @@ class NeuralCF:
             'n_movies': self.n_movies
         }
         with open(filepath, 'wb') as f:
-            pickle.dump(metadata, f)
+            pickle.dump(model_data, f)
         
-        print(f"Model saved to {filepath} and {model_path}")
+        print(f"Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
         """Load model from disk"""
-        # Load metadata
         with open(filepath, 'rb') as f:
-            metadata = pickle.load(f)
+            model_data = pickle.load(f)
         
-        # Create instance
         model = cls(
-            embedding_dim=metadata['embedding_dim'],
-            hidden_layers=metadata['hidden_layers'],
-            learning_rate=metadata['learning_rate']
+            hidden_layers=model_data['hidden_layers'],
+            learning_rate=model_data['learning_rate'],
+            max_iter=model_data['max_iter']
         )
         
-        # Load Keras model
-        model_path = filepath.replace('.pkl', '_keras.h5')
-        model.model = keras.models.load_model(model_path)
-        
-        # Restore metadata
-        model.user_id_map = metadata['user_id_map']
-        model.movie_id_map = metadata['movie_id_map']
-        model.idx_to_user = metadata['idx_to_user']
-        model.idx_to_movie = metadata['idx_to_movie']
-        model.mean_rating = metadata['mean_rating']
-        model.n_users = metadata['n_users']
-        model.n_movies = metadata['n_movies']
+        model.model = model_data['model']
+        model.user_id_map = model_data['user_id_map']
+        model.movie_id_map = model_data['movie_id_map']
+        model.idx_to_user = model_data['idx_to_user']
+        model.idx_to_movie = model_data['idx_to_movie']
+        model.mean_rating = model_data['mean_rating']
+        model.n_users = model_data['n_users']
+        model.n_movies = model_data['n_movies']
         
         print(f"Model loaded from {filepath}")
         return model
