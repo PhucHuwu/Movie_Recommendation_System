@@ -36,7 +36,7 @@ def main():
                 metrics = json.load(f)
                 db.save_metrics(metrics)
     except:
-        print("⚠ Evaluation metrics not found (run evaluation.py first)")
+        print("Evaluation metrics not found (run evaluation.py first)")
     
     print("\nDatabase seeding completed!")
     print("\nYou can now start the backend server:")

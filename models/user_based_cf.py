@@ -119,6 +119,13 @@ class UserBasedCF:
         user_idx = self.user_id_map[user_id]
         user_ratings = self.interaction_matrix[user_idx].toarray().flatten()
         
+        # Check if user is in sampled set
+        if self.sampled_user_indices is not None:
+            sampled_pos = np.where(self.sampled_user_indices == user_idx)[0]
+            if len(sampled_pos) == 0:
+                # User not in sampled set - use item-based approach
+                return self._recommend_by_rated_items(user_idx, user_ratings, k, exclude_rated)
+        
         if exclude_rated:
             unrated_movies = np.where(user_ratings == 0)[0]
         else:
@@ -137,6 +144,53 @@ class UserBasedCF:
         
         predictions.sort(key=lambda x: x[1], reverse=True)
         return predictions[:k]
+    
+    def _recommend_by_rated_items(self, user_idx, user_ratings, k=10, exclude_rated=True):
+        """Recommend based on user's highly rated items (for non-sampled users)"""
+        # Find movies user has rated highly
+        rated_indices = np.where(user_ratings >= 4.0)[0]
+        
+        if len(rated_indices) == 0:
+            rated_indices = np.where(user_ratings > 0)[0]
+        
+        if len(rated_indices) == 0:
+            return self._recommend_popular(k)
+        
+        # Find movies similar to user's favorites (by co-rating pattern)
+        all_predictions = []
+        
+        for rated_idx in rated_indices[:10]:  # Use top 10 rated movies
+            # Find users who also rated this movie highly
+            movie_ratings = self.interaction_matrix[:, rated_idx].toarray().flatten()
+            similar_users = np.where(movie_ratings >= 4.0)[0]
+            
+            if len(similar_users) > 0:
+                # Get movies these users also liked
+                for sim_user in similar_users[:50]:  # Limit for speed
+                    sim_user_ratings = self.interaction_matrix[sim_user].toarray().flatten()
+                    liked_movies = np.where(sim_user_ratings >= 4.0)[0]
+                    
+                    for movie_idx in liked_movies:
+                        if exclude_rated and user_ratings[movie_idx] > 0:
+                            continue
+                        movie_id = self.idx_to_movie[movie_idx]
+                        all_predictions.append((movie_id, sim_user_ratings[movie_idx]))
+        
+        # Aggregate predictions
+        if not all_predictions:
+            return self._recommend_popular(k)
+        
+        movie_scores = {}
+        for movie_id, score in all_predictions:
+            if movie_id not in movie_scores:
+                movie_scores[movie_id] = []
+            movie_scores[movie_id].append(score)
+        
+        # Average scores
+        final_predictions = [(m, np.mean(scores)) for m, scores in movie_scores.items()]
+        final_predictions.sort(key=lambda x: x[1], reverse=True)
+        
+        return final_predictions[:k]
     
     def _recommend_popular(self, k=10):
         """Recommend popular movies"""

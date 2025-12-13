@@ -98,7 +98,7 @@ def copy_dataset_files(source_path, source_name):
         if len(movies) >= 2000:
             print(f"\nDataset meets minimum requirement of 2,000 movies")
         else:
-            print(f"\n⚠ Note: Dataset has {len(movies)} movies")
+            print(f"\nNote: Dataset has {len(movies)} movies")
         
         return True
     else:
