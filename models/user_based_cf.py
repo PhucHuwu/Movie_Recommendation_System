@@ -62,7 +62,7 @@ class UserBasedCF:
             batch_size=500
         )
         
-        print(f"✓ User similarity computed: {self.user_similarity.shape}")
+        print(f"User similarity computed: {self.user_similarity.shape}")
         
     def predict(self, user_id, movie_id):
         """Predict rating for a user-movie pair"""
@@ -167,7 +167,7 @@ class UserBasedCF:
         }
         with open(filepath, 'wb') as f:
             pickle.dump(model_data, f)
-        print(f"✓ Model saved to {filepath}")
+        print(f"Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
@@ -178,5 +178,5 @@ class UserBasedCF:
         for k, v in data.items():
             if k not in ['k_neighbors', 'sample_users']:
                 setattr(model, k, v)
-        print(f"✓ Model loaded from {filepath}")
+        print(f"Model loaded from {filepath}")
         return model

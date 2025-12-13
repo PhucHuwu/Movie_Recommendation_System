@@ -86,9 +86,9 @@ def train_neural_cf(train_ratings, mappings):
     print("=" * 60)
     
     model = NeuralCF(
-        embedding_dim=32,
-        hidden_layers=[64, 32, 16, 8],
-        learning_rate=0.001
+        hidden_layers=(64, 32, 16),
+        learning_rate=0.001,
+        max_iter=NCF_EPOCHS
     )
     
     history = model.fit(
@@ -97,10 +97,7 @@ def train_neural_cf(train_ratings, mappings):
         mappings['movie_id_map'],
         mappings['idx_to_user'],
         mappings['idx_to_movie'],
-        mappings['mean_rating'],
-        epochs=NCF_EPOCHS,
-        batch_size=NCF_BATCH_SIZE,
-        validation_split=0.1
+        mappings['mean_rating']
     )
     
     # Save model

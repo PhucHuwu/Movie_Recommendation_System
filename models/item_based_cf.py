@@ -51,7 +51,7 @@ class ItemBasedCF:
             batch_size=500
         )
         
-        print(f"✓ Item similarity computed: {self.item_similarity.shape}")
+        print(f"Item similarity computed: {self.item_similarity.shape}")
         
     def predict(self, user_id, movie_id):
         """Predict rating for a user-movie pair"""
@@ -147,7 +147,7 @@ class ItemBasedCF:
         }
         with open(filepath, 'wb') as f:
             pickle.dump(model_data, f)
-        print(f"✓ Model saved to {filepath}")
+        print(f"Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
@@ -158,5 +158,5 @@ class ItemBasedCF:
         for k, v in data.items():
             if k != 'k_neighbors':
                 setattr(model, k, v)
-        print(f"✓ Model loaded from {filepath}")
+        print(f"Model loaded from {filepath}")
         return model
