@@ -1,20 +1,21 @@
 """
-User-Based Collaborative Filtering Model
+User-Based Collaborative Filtering Model - Optimized for Large Datasets
 """
 import numpy as np
 from scipy.sparse import csr_matrix
-from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
 class UserBasedCF:
-    def __init__(self, k_neighbors=50):
+    def __init__(self, k_neighbors=50, sample_users=None):
         """
         User-Based Collaborative Filtering
         
         Args:
             k_neighbors: Number of similar users to consider
+            sample_users: Max users to use for similarity (None = all)
         """
         self.k_neighbors = k_neighbors
+        self.sample_users = sample_users
         self.user_similarity = None
         self.interaction_matrix = None
         self.user_id_map = None
@@ -22,19 +23,12 @@ class UserBasedCF:
         self.idx_to_user = None
         self.idx_to_movie = None
         self.mean_rating = None
+        self.sampled_user_indices = None
         
     def fit(self, interaction_matrix, user_id_map, movie_id_map, 
             idx_to_user, idx_to_movie, mean_rating):
         """
-        Train the model by computing user-user similarity
-        
-        Args:
-            interaction_matrix: Sparse user-item matrix
-            user_id_map: Dict mapping userId to matrix index
-            movie_id_map: Dict mapping movieId to matrix index
-            idx_to_user: Dict mapping matrix index to userId
-            idx_to_movie: Dict mapping matrix index to movieId
-            mean_rating: Mean rating for normalization
+        Train the model by computing user-user similarity (sparse, top-k only)
         """
         print("Training User-Based CF...")
         
@@ -45,77 +39,84 @@ class UserBasedCF:
         self.idx_to_movie = idx_to_movie
         self.mean_rating = mean_rating
         
-        # Compute user-user similarity using cosine similarity
-        print("Computing user-user similarity matrix...")
-        self.user_similarity = cosine_similarity(interaction_matrix, dense_output=False)
+        n_users = interaction_matrix.shape[0]
         
-        print(f"User similarity matrix shape: {self.user_similarity.shape}")
+        # Sample users if dataset is too large
+        if self.sample_users and n_users > self.sample_users:
+            print(f"  Sampling {self.sample_users:,} users from {n_users:,}...")
+            self.sampled_user_indices = np.random.choice(
+                n_users, self.sample_users, replace=False
+            )
+            matrix_for_sim = interaction_matrix[self.sampled_user_indices]
+        else:
+            self.sampled_user_indices = None
+            matrix_for_sim = interaction_matrix
+        
+        # Compute top-k user similarities (sparse)
+        print("Computing top-k user similarities...")
+        from models.sparse_utils import sparse_cosine_similarity_top_k
+        
+        self.user_similarity = sparse_cosine_similarity_top_k(
+            matrix_for_sim, 
+            k=self.k_neighbors,
+            batch_size=500
+        )
+        
+        print(f"✓ User similarity computed: {self.user_similarity.shape}")
         
     def predict(self, user_id, movie_id):
-        """
-        Predict rating for a user-movie pair
-        
-        Args:
-            user_id: User ID
-            movie_id: Movie ID
-            
-        Returns:
-            Predicted rating
-        """
+        """Predict rating for a user-movie pair"""
         if user_id not in self.user_id_map or movie_id not in self.movie_id_map:
             return self.mean_rating
         
         user_idx = self.user_id_map[user_id]
         movie_idx = self.movie_id_map[movie_id]
         
+        # Handle sampled case
+        if self.sampled_user_indices is not None:
+            # Find if user is in sampled set
+            sampled_pos = np.where(self.sampled_user_indices == user_idx)[0]
+            if len(sampled_pos) == 0:
+                return self.mean_rating
+            user_sim_idx = sampled_pos[0]
+        else:
+            user_sim_idx = user_idx
+        
         # Get user similarities
-        user_sims = self.user_similarity[user_idx].toarray().flatten()
+        user_sims = self.user_similarity[user_sim_idx].toarray().flatten()
         
-        # Get users who rated this movie
+        # Get all user ratings for this movie
         movie_ratings = self.interaction_matrix[:, movie_idx].toarray().flatten()
-        rated_users = np.where(movie_ratings > 0)[0]
         
-        if len(rated_users) == 0:
-            return self.mean_rating
-        
-        # Get similarities and ratings for users who rated this movie
-        sims = user_sims[rated_users]
-        ratings = movie_ratings[rated_users]
-        
-        # Get top-k similar users
-        if len(sims) > self.k_neighbors:
-            top_k_idx = np.argsort(sims)[-self.k_neighbors:]
-            sims = sims[top_k_idx]
-            ratings = ratings[top_k_idx]
+        # Find similar users who rated this movie
+        if self.sampled_user_indices is not None:
+            rated_mask = movie_ratings[self.sampled_user_indices] > 0
+            similar_users = np.where(rated_mask)[0]
+            if len(similar_users) == 0:
+                return self.mean_rating
+            sims = user_sims[similar_users]
+            ratings = movie_ratings[self.sampled_user_indices[similar_users]]
+        else:
+            rated_mask = movie_ratings > 0
+            similar_users = np.where(rated_mask)[0]
+            if len(similar_users) == 0:
+                return self.mean_rating
+            sims = user_sims[similar_users]
+            ratings = movie_ratings[similar_users]
         
         # Weighted average
         if sims.sum() == 0:
             return self.mean_rating
         
-        predicted = np.dot(sims, ratings) / sims.sum()
-        
-        # Clip to valid rating range
+        predicted = np.dot(sims, ratings) / (np.abs(sims).sum() + 1e-8)
         return np.clip(predicted, 0.5, 5.0)
     
     def recommend(self, user_id, k=10, exclude_rated=True):
-        """
-        Generate top-k recommendations for a user
-        
-        Args:
-            user_id: User ID
-            k: Number of recommendations
-            exclude_rated: Whether to exclude already rated movies
-            
-        Returns:
-            List of (movie_id, predicted_rating) tuples
-        """
+        """Generate top-k recommendations"""
         if user_id not in self.user_id_map:
-            # New user - return popular movies
             return self._recommend_popular(k)
         
         user_idx = self.user_id_map[user_id]
-        
-        # Get movies the user hasn't rated
         user_ratings = self.interaction_matrix[user_idx].toarray().flatten()
         
         if exclude_rated:
@@ -123,63 +124,59 @@ class UserBasedCF:
         else:
             unrated_movies = np.arange(self.interaction_matrix.shape[1])
         
-        # Predict ratings for all unrated movies
+        # Sample unrated movies if too many
+        if len(unrated_movies) > 1000:
+            unrated_movies = np.random.choice(unrated_movies, 1000, replace=False)
+        
+        # Predict ratings
         predictions = []
         for movie_idx in unrated_movies:
             movie_id = self.idx_to_movie[movie_idx]
-            pred_rating = self.predict(user_id, movie_id)
-            predictions.append((movie_id, pred_rating))
+            pred = self.predict(user_id, movie_id)
+            predictions.append((movie_id, pred))
         
-        # Sort by predicted rating
         predictions.sort(key=lambda x: x[1], reverse=True)
-        
         return predictions[:k]
     
     def _recommend_popular(self, k=10):
-        """Recommend popular movies for cold-start users"""
-        # Calculate average rating for each movie
+        """Recommend popular movies"""
         movie_ratings = []
-        for movie_idx in range(self.interaction_matrix.shape[1]):
+        n_movies = min(1000, self.interaction_matrix.shape[1])
+        for movie_idx in range(n_movies):
             ratings = self.interaction_matrix[:, movie_idx].toarray().flatten()
             ratings = ratings[ratings > 0]
             if len(ratings) > 0:
-                avg_rating = ratings.mean()
                 movie_id = self.idx_to_movie[movie_idx]
-                movie_ratings.append((movie_id, avg_rating))
-        
+                movie_ratings.append((movie_id, ratings.mean()))
         movie_ratings.sort(key=lambda x: x[1], reverse=True)
         return movie_ratings[:k]
     
     def save(self, filepath):
-        """Save model to disk"""
+        """Save model"""
         model_data = {
             'k_neighbors': self.k_neighbors,
+            'sample_users': self.sample_users,
             'user_similarity': self.user_similarity,
             'interaction_matrix': self.interaction_matrix,
             'user_id_map': self.user_id_map,
             'movie_id_map': self.movie_id_map,
             'idx_to_user': self.idx_to_user,
             'idx_to_movie': self.idx_to_movie,
-            'mean_rating': self.mean_rating
+            'mean_rating': self.mean_rating,
+            'sampled_user_indices': self.sampled_user_indices
         }
         with open(filepath, 'wb') as f:
             pickle.dump(model_data, f)
-        print(f"Model saved to {filepath}")
+        print(f"✓ Model saved to {filepath}")
     
     @classmethod
     def load(cls, filepath):
-        """Load model from disk"""
+        """Load model"""
         with open(filepath, 'rb') as f:
-            model_data = pickle.load(f)
-        
-        model = cls(k_neighbors=model_data['k_neighbors'])
-        model.user_similarity = model_data['user_similarity']
-        model.interaction_matrix = model_data['interaction_matrix']
-        model.user_id_map = model_data['user_id_map']
-        model.movie_id_map = model_data['movie_id_map']
-        model.idx_to_user = model_data['idx_to_user']
-        model.idx_to_movie = model_data['idx_to_movie']
-        model.mean_rating = model_data['mean_rating']
-        
-        print(f"Model loaded from {filepath}")
+            data = pickle.load(f)
+        model = cls(k_neighbors=data['k_neighbors'], sample_users=data.get('sample_users'))
+        for k, v in data.items():
+            if k not in ['k_neighbors', 'sample_users']:
+                setattr(model, k, v)
+        print(f"✓ Model loaded from {filepath}")
         return model
