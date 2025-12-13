@@ -1,5 +1,5 @@
 """
-Data visualization page
+Data visualization page - Optimized with caching and sampling
 """
 import streamlit as st
 import requests
@@ -7,78 +7,67 @@ import plotly.express as px
 import plotly.graph_objects as go
 from config import BACKEND_URL
 
+@st.cache_data(ttl=300)  # Cache for 5 minutes
+def fetch_rating_distribution():
+    """Fetch rating distribution with caching"""
+    response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/rating-distribution", timeout=30)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+@st.cache_data(ttl=300)
+def fetch_genre_distribution():
+    """Fetch genre distribution with caching"""
+    response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/genre-distribution", timeout=30)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
 def show():
-    """Show data visualizations"""
+    """Show visualization page"""
     st.title("Data Visualizations")
+    st.caption("Visual analysis of the dataset (sampled for performance)")
     
-    try:
-        # Rating Distribution
-        st.markdown("### Rating Distribution")
-        rating_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/rating-distribution")
-        
-        if rating_response.status_code == 200:
-            rating_data = rating_response.json()
-            
-            fig = px.bar(
-                x=rating_data['labels'],
-                y=rating_data['values'],
-                labels={'x': 'Rating', 'y': 'Count'},
-                title='Distribution of Movie Ratings'
-            )
-            fig.update_layout(showlegend=False)
-            st.plotly_chart(fig, use_container_width=True)
-        
-        st.markdown("---")
-        
-        # Genre Distribution
-        st.markdown("### Genre Distribution")
-        genre_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/genre-distribution")
-        
-        if genre_response.status_code == 200:
-            genre_data = genre_response.json()
-            
-            fig = px.bar(
-                x=genre_data['labels'],
-                y=genre_data['values'],
-                labels={'x': 'Genre', 'y': 'Number of Movies'},
-                title='Top 15 Movie Genres'
-            )
-            fig.update_layout(xaxis_tickangle=-45)
-            st.plotly_chart(fig, use_container_width=True)
-        
-        st.markdown("---")
-        
-        # User Activity
-        st.markdown("### User Activity Distribution")
-        activity_response = requests.get(f"{BACKEND_URL}/api/admin/visualizations/user-activity")
-        
-        if activity_response.status_code == 200:
-            activity_data = activity_response.json()
-            buckets = activity_data['buckets']
-            
-            if buckets:
-                # Create labels
-                labels = []
-                values = []
-                
-                for bucket in buckets:
-                    bucket_id = bucket['_id']
-                    if isinstance(bucket_id, (int, float)):
-                        labels.append(f"{int(bucket_id)}+")
-                    else:
-                        labels.append(str(bucket_id))
-                    values.append(bucket['users'])
-                
-                fig = px.pie(
-                    values=values,
-                    names=labels,
-                    title='Number of Ratings per User'
+    # Tabs for different visualizations
+    tab1, tab2 = st.tabs(["Rating Distribution", "Genre Distribution"])
+    
+    with tab1:
+        st.subheader("Rating Distribution")
+        with st.spinner("Loading..."):
+            data = fetch_rating_distribution()
+            if data and data.get('labels'):
+                fig = px.bar(
+                    x=data['labels'],
+                    y=data['values'],
+                    labels={'x': 'Rating', 'y': 'Count'},
+                    title='Distribution of Ratings'
                 )
+                fig.update_layout(showlegend=False)
                 st.plotly_chart(fig, use_container_width=True)
-        
-        st.markdown("---")
-        st.info("These visualizations help understand the dataset characteristics and user behavior patterns.")
-        
-    except Exception as e:
-        st.error(f"Connection error: {e}")
-        st.info("Make sure the backend server is running.")
+                
+                if data.get('note'):
+                    st.caption(data['note'])
+            else:
+                st.warning("No rating data available")
+    
+    with tab2:
+        st.subheader("Genre Distribution")
+        with st.spinner("Loading..."):
+            data = fetch_genre_distribution()
+            if data and data.get('labels'):
+                fig = px.bar(
+                    x=data['values'],
+                    y=data['labels'],
+                    orientation='h',
+                    labels={'x': 'Movie Count', 'y': 'Genre'},
+                    title='Top 15 Genres'
+                )
+                fig.update_layout(showlegend=False, yaxis={'categoryorder': 'total ascending'})
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("No genre data available")
+    
+    # Clear cache button
+    if st.button("Refresh Data"):
+        st.cache_data.clear()
+        st.rerun()

@@ -2,8 +2,8 @@
 Recommendations routes
 """
 from fastapi import APIRouter, HTTPException, Query
-from backend.services.recommendation_service import recommendation_service
-from backend.database import db
+from services.recommendation_service import recommendation_service
+from database import db
 
 router = APIRouter(prefix="/api/recommendations", tags=["recommendations"])
 

@@ -1,12 +1,18 @@
 """
 FastAPI Backend Server
 """
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# Import routes
-from backend.routes import auth, movies, recommendations, admin
+# Import routes (relative imports)
+from routes import auth, movies, recommendations, admin
 
 # Create FastAPI app
 app = FastAPI(

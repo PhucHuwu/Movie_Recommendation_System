@@ -3,7 +3,7 @@ Authentication routes
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from backend.database import db
+from database import db
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
