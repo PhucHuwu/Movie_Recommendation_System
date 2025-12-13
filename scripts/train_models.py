@@ -39,7 +39,11 @@ def train_user_based_cf(interaction_matrix, mappings):
     print("TRAINING USER-BASED CF")
     print("=" * 60)
     
-    model = UserBasedCF(k_neighbors=50)
+    # Sample users for large datasets (10K users max)
+    n_users = interaction_matrix.shape[0]
+    sample_users = 10000 if n_users > 10000 else None
+    
+    model = UserBasedCF(k_neighbors=50, sample_users=sample_users)
     model.fit(
         interaction_matrix,
         mappings['user_id_map'],
